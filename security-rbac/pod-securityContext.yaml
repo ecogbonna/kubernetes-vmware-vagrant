@@ -1,0 +1,11 @@
+# PodSecurityPolicy has been deprecated (check doc. to confirm)
+kind: Pod
+apiVersion: v1
+metadata:
+  name: privileged-pod
+spec:
+  containers:
+    - name: privileged-pod
+      image: nginx
+      securityContext:
+        privileged: true

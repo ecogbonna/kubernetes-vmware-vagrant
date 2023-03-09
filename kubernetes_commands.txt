@@ -1,0 +1,404 @@
++------------------------------+
+Kubernetes Architecture: Cluster
++------------------------------+
+
+## Deploy GKE cluster and prepare kubectl
+
+	Standard cluster:
+	gcloud container clusters create --machine-type=n1-standard-4 --num-nodes "2" --network griffin-dev-vpc --subnetwork griffin-dev-wp --zone=us-east1-b griffin-dev 
+
+	Autopilot cluster:
+	gcloud container clusters create-auto hello-cluster \
+		--region=COMPUTE_REGION
+		
+	gcloud container clusters get-credentials nucleus-kcluster --zone=us-central1-a
+
+	source <(kubectl completion bash)
+
+
+## Inspect GKE cluster and Nodes
+
+	source <(kubectl completion bash)
+
+	kubectl config view
+	kubectl cluster-info
+	kubectl config current-context
+	kubectl config get-contexts
+	kubectl config use-context gke_${GOOGLE_CLOUD_PROJECT}_us-central1-a_standard-cluster-1
+
+	kubectl get nodes
+	kubectl get nodes -l temp=true
+	kubectl top nodes
+
+
+## Cluster scaling
+
+	## resize a node pool
+	
+	gcloud container clusters resize CLUSTER_NAME --node-pool POOL_NAME \
+		--num-nodes NUM_NODES
+		
+	Or:
+
+	gcloud container clusters resize $my_cluster --zone $my_zone --num-nodes=4
+
+
+	## add a node pool
+	
+	gcloud container node-pools create "temp-pool-1" \
+	--cluster=$my_cluster --zone=$my_zone \
+	--num-nodes "2" --node-labels=temp=true --preemptible
+
+
+
++----------------+
+Kubernetes Objects
++----------------+
+Note: 
+Your object can either be an API resource (cluster resource) or a workload resource (objects running inside pods which are running in nodes)
+Whether your workload is a single component or several that work together, on Kubernetes you run it inside a set of pods.
+
+
+## Learn about the object:
+
+ # 1. The explain command in kubectl can tell us about the object:
+
+	kubectl explain deployment
+	kubectl explain jobs
+	kubectl explain cronjobs
+	
+	
+ # 2. We can also see all of the fields using the --recursive option:
+
+	kubectl explain deployment --recursive
+
+
+ # 3. You can use the explain command to help you understand the structure of a other kubernetes objects and understand what the individual fields do:
+
+	kubectl explain deployment.metadata.name
+	kubectl explain jobs.spec
+	kubectl explain cronjobs.spec
+	
+
+	
+## Create and Inspect object
+
+	## Create Objects
+	
+	kubectl create [OBJECT_TYPE] --image [image] [image_name]
+    kubectl create -f ./file.yml
+    kubectl create -f ./file1.yml -f ./file2.yaml
+    kubectl create -f ./dir
+    kubectl create -f url
+	
+	kubectl create pod --image nginx nginx-1
+
+
+	### Create multiple YAML objects from stdin
+		cat <<EOF | kubectl create -f -
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		  name: busybox-sleep
+		spec:
+		  containers:
+		  - name: busybox
+			image: busybox
+			args:
+			- sleep
+			- "1000000"
+		---
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		  name: busybox-sleep-less
+		spec:
+		  containers:
+		  - name: busybox
+			image: busybox
+			args:
+			- sleep
+			- "1000"
+		EOF
+	
+	
+	
+	kubectl apply -f [yaml_path]
+	kubectl apply -f ./new-nginx-pod.yaml
+
+
+	## Inspect object
+	kubectl get [OBJECT_TYPE]					  						# List all objects in current namespace
+	kubectl get [OBJECT_TYPE] --all-namespaces             				# List all object_type in all namespaces
+	kubectl get [OBJECT_TYPE] -o wide
+	kubectl get [OBJECT_TYPE] [OBJECT_NAME] -o yaml
+	kubectl -n <namespace> get <resource type> <resource Name> -o yaml
+    kubectl get [OBJECT_TYPE] -l key=value            					# List all pods with a label env=production
+	
+	
+	
+	kubectl get pods -o wide
+	kubectl get deployments -o=wide
+	kubectl get services 
+	kubectl get service web
+	kubectl get deployment
+	kubectl get jobs
+	kubectl get nodes -l temp=true
+	kubectl get pods -l env=production            						# List all pods with a label env=production
+	kubectl get jobs -o=wide
+	kubectl get rc <rc-name>                      						# List a particular replication controller
+	kubectl get networkpolicy
+	kubectl get services --sort-by=.metadata.name						# List Services Sorted by Name
+	
+	
+	### List pods Sorted by Restart Count
+    kubectl get pods --sort-by=.status.containerStatuses[0].restartCount								
+
+	### Get the version label of all pods with label app=cassandra
+    kubectl get pods --selector=app=cassandra rc -o 'jsonpath={.items[*].metadata.labels.version}'		
+
+	### Get ExternalIPs of all nodes
+    kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=ExternalIP)].address}'		
+
+	### Check which nodes are ready
+	kubectl get nodes -o jsonpath='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'| tr ';' "\n"  | grep "Ready=True"	
+	
+	### Seeing only 3 jobs in the history? Inspect:
+	kubectl get cronjobs.batch hello -o=yaml | grep History
+
+
+	kubectl describe [OBJECT_TYPE] [OBJECT_NAME]
+	kubectl describe job example-job
+	kubectl describe deployments
+
+
+## Modifying Objects
+
+
+    kubectl label pods <pod-name> new-label=awesome                  # Add a Label
+    kubectl annotate pods <pod-name> icon-url=http://goo.gl/XXBTWq   # Add an annotation
+	
+
+
+## Deleting Objects
+	
+	kubectl delete [object_type] [object_name]	
+	
+	kubectl delete pod pvc-demo-pod
+	kubectl delete job example-job
+
+
+
+## Pods	
+
+	### Use shell redirection to connect to a Pod:
+
+		kubectl exec -it [pod_name] [terminal_path]
+		kubectl exec -it new-nginx /bin/bash
+
+
+
+	### View the logs of a Pod:
+
+		kubectl logs [pod_name]
+		kubectl logs [pod_name] -f --timestamps
+		
+		kubectl logs new-nginx -f --timestamps
+		
+		
+		
+	### Interacting with running Pods
+
+    kubectl logs <pod-name>
+    kubectl logs -f <pod-name>
+
+    kubectl run -i --tty busybox --image=busybox -- sh      # Run pod as interactive shell
+    kubectl attach <podname> -i                             # Attach to Running Container
+    kubectl port-forward <podname> <local-and-remote-port>  # Forward port of Pod to your local machine
+    kubectl port-forward <servicename> <port>               # Forward port to service
+    kubectl exec <pod-name> -- ls /                         # Run command in existing pod (1 container case)
+    kubectl exec <pod-name> -c <container-name> -- ls /     # Run command in existing pod (multi-container case)
+	
+	
+	
+	
+## Deployments
+
+	
+	### Scale a deployment
+
+	kubectl scale --replicas=3 deployment nginx-deployment
+	kubectl autoscale deployment web --max 4 --min 1 --cpu-percent 1						# when averageUtilization is at 1%, scale the deployment to 4 replicas
+
+	kubectl get hpa																			# Inspect the HorizontalPodAutoscaler object
+	kubectl describe horizontalpodautoscaler web
+	kubectl get horizontalpodautoscaler web -o yaml
+	
+	
+	### Trigger a deployment rollout:
+
+	kubectl describe deployment nginx-deployment | grep RollingUpdateStrategy
+	
+	kubectl set image deployment.v1.apps/nginx-deployment nginx=nginx:1.9.1 --record
+
+
+
+	### Inspect a deployment rollout	
+
+	kubectl rollout status deployment.v1.apps/nginx-deployment
+	kubectl rollout history deployment nginx-deployment
+
+
+
+	### Trigger a deployment rollback:
+	
+	kubectl rollout undo deployments nginx-deployment
+	kubectl rollout history deployment nginx-deployment
+	kubectl rollout history deployment/nginx-deployment --revision=3
+
+
+
+## Services
+
+	### Create an expose a deployment
+	
+    kubectl run nginx --image=nginx:1.9.12
+    kubectl expose deployment nginx --port=80 --type=LoadBalancer
+	
+	kubectl expose deployment web --target-port=8080 --type=NodePort
+	kubectl run hello-web --labels app=hello \
+	--image=gcr.io/google-samples/hello-app:1.0 --port 8080 --expose
+
+
+	### Testing Pod connectivity
+	
+	ping -c 3 <hostname>.<subdomain>.<namespace>.svc.cluster.local
+	ping -c 3 dns-demo-2.dns-demo.default.svc.cluster.local
+	
+	ping -c 3 <service_name>.<namespace>.svc.cluster.local
+	ping -c 3 dns-demo.default.svc.cluster.local
+	
+	
+	
+	### Checking that the DNS works:
+
+    kubectl exec busybox -- nslookup kubernetes
+    kubectl exec busybox -- nslookup kubernetes.default
+    kubectl exec busybox -- nslookup kubernetes.default.svc.cluster.local
+	
+	
+	
++----------------+
+Kubernetes Storage
++----------------+
+
+## Create, Inspect storage resources
+
+	kubectl apply -f pvc-demo.yaml
+	
+	kubectl get persistentvolumeclaim
+	kubectl get pvc
+	
+	kubectl get persistentvolume
+	kubectl get pv
+	
+	gcloud compute disks list
+
+	kubectl exec -it pvc-demo-pod -- sh			  # verify the PVC is accessible within the Pod
+	
+	
+	### Create a secret with several keys
+    cat <<EOF | kubectl create -f -
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mysecret
+    type: Opaque
+    data:
+      password: $(echo -n "Sup3rS3cr3t" | base64)
+      username: $(echo -n "superuser" | base64)
+    EOF
+	
+	
+	
++------------+
+Pod Scheduling
++------------+	
+
+## Taint a Node
+
+	kubectl taint node -l temp=true nodetype=preemptible:NoExecute
+	
+
+## Create a ConfigMap from a file
+
+    kubectl create configmap nginx-ghost --from-file=configs/ghost.conf --namespace=ghost
+
+## Create a secret from a file
+
+    kubectl create secret generic db-user-pass --from-file=./username.txt --from-file=./password.txt
+
+## Handy bash Aliases
+
+    alias k="kubectl"
+    alias kc="kubectl create -f"
+    alias kg="kubectl get"
+    alias pods="kubectl get pods"
+    alias allpods="kubectl get pods --all-namespaces"
+    alias rcs="kubectl get rc"
+    alias svcs="kubectl get services"
+    alias dep="kubectl get deployment"
+    alias kd="kubectl describe"
+    alias kdp="kubectl describe pod "
+    alias kds="kubectl describe service "
+    alias nodes="kubectl get nodes"
+    alias klogs="kubectl logs"
+    alias ns="kubectl get ns"
+    alias deploys="kubectl get deployment"
+    alias events="kubectl get events"
+    alias kexec="kubectl exec -it "
+    alias secrets="kubectl get secrets"
+    alias igs="kubectl get ingress"
+    alias contexts="kubectl config get-contexts"
+    alias ktop="kubectl top nodes"
+
+
+## Handy bash functions
+
+
+### Delete pod, don't wait
+
+    function dp(){
+      kubectl delete pod $1 --grace-period=0
+    }
+
+### Secrets related functions
+
+    function encode(){
+      echo -n "$1" | base64
+    }
+
+
+    function decode(){
+      echo -n "$1" | base64 -D
+    }
+
+    function gettoken(){
+      kubectl get secret $(kubectl get secret | grep default | awk '{print $1}') -o yaml | grep "token:" | awk '{print $2}' | base64 -D
+    }
+
+
+### set context quickly
+
+    function context(){
+      kubectl config use-context $1
+    }
+
+### run bash in a pod
+
+    function dex(){
+      docker exec -it $1 bash
+    }
+
+
+# References: https://gist.github.com/ipedrazas/95391ffd88190bea94ca188d3d2c1cbe
