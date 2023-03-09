@@ -87,10 +87,10 @@ Whether your workload is a single component or several that work together, on Ku
 	## Create Objects
 	
 	kubectl create [OBJECT_TYPE] --image [image] [image_name]
-    kubectl create -f ./file.yml
-    kubectl create -f ./file1.yml -f ./file2.yaml
-    kubectl create -f ./dir
-    kubectl create -f url
+    	kubectl create -f ./file.yml
+    	kubectl create -f ./file1.yml -f ./file2.yaml
+    	kubectl create -f ./dir
+    	kubectl create -f url
 	
 	kubectl create pod --image nginx nginx-1
 
@@ -129,12 +129,12 @@ Whether your workload is a single component or several that work together, on Ku
 
 
 	## Inspect object
-	kubectl get [OBJECT_TYPE]					  						# List all objects in current namespace
-	kubectl get [OBJECT_TYPE] --all-namespaces             				# List all object_type in all namespaces
+	kubectl get [OBJECT_TYPE]					  			# List all objects in current namespace
+	kubectl get [OBJECT_TYPE] --all-namespaces             					# List all object_type in all namespaces
 	kubectl get [OBJECT_TYPE] -o wide
 	kubectl get [OBJECT_TYPE] [OBJECT_NAME] -o yaml
 	kubectl -n <namespace> get <resource type> <resource Name> -o yaml
-    kubectl get [OBJECT_TYPE] -l key=value            					# List all pods with a label env=production
+    	kubectl get [OBJECT_TYPE] -l key=value            					# List all pods with a label env=production
 	
 	
 	
@@ -153,18 +153,19 @@ Whether your workload is a single component or several that work together, on Ku
 	
 	
 	### List pods Sorted by Restart Count
-    kubectl get pods --sort-by=.status.containerStatuses[0].restartCount								
+    	kubectl get pods --sort-by=.status.containerStatuses[0].restartCount								
 
 	### Get the version label of all pods with label app=cassandra
-    kubectl get pods --selector=app=cassandra rc -o 'jsonpath={.items[*].metadata.labels.version}'		
+    	kubectl get pods --selector=app=cassandra rc -o 'jsonpath={.items[*].metadata.labels.version}'		
 
 	### Get ExternalIPs of all nodes
-    kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=ExternalIP)].address}'		
+    	kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=ExternalIP)].address}'		
 
 	### Check which nodes are ready
 	kubectl get nodes -o jsonpath='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'| tr ';' "\n"  | grep "Ready=True"	
 	
 	### Seeing only 3 jobs in the history? Inspect:
+	
 	kubectl get cronjobs.batch hello -o=yaml | grep History
 
 
@@ -229,9 +230,12 @@ Whether your workload is a single component or several that work together, on Ku
 	### Scale a deployment
 
 	kubectl scale --replicas=3 deployment nginx-deployment
-	kubectl autoscale deployment web --max 4 --min 1 --cpu-percent 1						# when averageUtilization is at 1%, scale the deployment to 4 replicas
+	kubectl autoscale deployment web --max 4 --min 1 --cpu-percent 1			# when averageUtilization is at 1%, scale the deployment to 4 replicas
 
-	kubectl get hpa																			# Inspect the HorizontalPodAutoscaler object
+
+	### Inspect the HorizontalPodAutoscaler object
+	
+	kubectl get hpa																		
 	kubectl describe horizontalpodautoscaler web
 	kubectl get horizontalpodautoscaler web -o yaml
 	
@@ -263,8 +267,8 @@ Whether your workload is a single component or several that work together, on Ku
 
 	### Create an expose a deployment
 	
-    kubectl run nginx --image=nginx:1.9.12
-    kubectl expose deployment nginx --port=80 --type=LoadBalancer
+    	kubectl run nginx --image=nginx:1.9.12
+    	kubectl expose deployment nginx --port=80 --type=LoadBalancer
 	
 	kubectl expose deployment web --target-port=8080 --type=NodePort
 	kubectl run hello-web --labels app=hello \
@@ -283,9 +287,9 @@ Whether your workload is a single component or several that work together, on Ku
 	
 	### Checking that the DNS works:
 
-    kubectl exec busybox -- nslookup kubernetes
-    kubectl exec busybox -- nslookup kubernetes.default
-    kubectl exec busybox -- nslookup kubernetes.default.svc.cluster.local
+    	kubectl exec busybox -- nslookup kubernetes
+    	kubectl exec busybox -- nslookup kubernetes.default
+    	kubectl exec busybox -- nslookup kubernetes.default.svc.cluster.local
 	
 	
 	
