@@ -11,6 +11,7 @@ Kubernetes Architecture: Cluster
 	gcloud container clusters create-auto hello-cluster \
 		--region=COMPUTE_REGION
 		
+	### prepare kubectl
 	gcloud container clusters get-credentials nucleus-kcluster --zone=us-central1-a
 
 	source <(kubectl completion bash)
