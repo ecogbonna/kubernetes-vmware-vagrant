@@ -1,0 +1,10 @@
+# For example, imagine there’s a public API available at api.somecompany.com.
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-service
+spec:
+  type: ExternalName
+  externalName: api.somecompany.com
+  ports:
+  - port: 80

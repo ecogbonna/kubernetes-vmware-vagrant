@@ -1,0 +1,12 @@
+# Manually shceduling a pod i.e. without a controller such as rc, rs, deployment
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubia-manual
+spec:
+  containers:
+  - image: chieme/kubia
+    name: kubia
+    ports:
+    - containerPort: 8080
+      protocol: TCP

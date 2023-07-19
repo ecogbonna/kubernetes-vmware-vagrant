@@ -1,0 +1,16 @@
+# The container requests 200 millicores (that is, 1/5 of a The container also single CPU core’s time). 1000m or 1000 millicore = 1 core
+# The container also requests 10 mebibytes of memory.
+# Duplicate data (dd) from input file (if) of /dev/zero (virtual limitless supply of 0's) into output file (of) of /dev/null (virtual sinkhole)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: requests-pod
+spec:
+  containers:
+  - image: busybox
+    command: ["dd", "if=/dev/zero", "of=/dev/null"]
+    name: main
+    resources:
+      requests:
+        cpu: 200m    
+        memory: 10Mi 

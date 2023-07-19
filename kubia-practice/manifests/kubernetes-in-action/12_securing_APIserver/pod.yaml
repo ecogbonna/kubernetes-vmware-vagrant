@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: foo-pod
+spec:
+  serviceAccount: foo
+  containers:
+    - image: nginx
+      name: nginx
+      ports:
+        - containerPort: 8080
+          protocol: TCP

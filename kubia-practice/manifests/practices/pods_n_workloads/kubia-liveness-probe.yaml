@@ -1,0 +1,14 @@
+# HTTP GET probe
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubia-liveness
+spec:
+  containers:
+  - image: chieme/kubia-unhealthy
+    name: kubia
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 8080
+

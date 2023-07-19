@@ -1,0 +1,12 @@
+apiVersion: apiregistration.k8s.io/v1beta1
+kind: APIService
+metadata:
+  name: v1alpha1.extensions.example.com
+spec:
+  group: extensions.example.com
+  groupPriorityMinimum: 150
+  version: v1alpha1
+  versionPriority: 0
+  service:
+    name: website-api
+    namespace: default
