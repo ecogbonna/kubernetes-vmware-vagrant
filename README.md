@@ -3,7 +3,7 @@ Some YAML files were adopted from my Google partner labs and will be used as sta
 There are also files from Kubernetes in Action book by Marko Lukša. In fact, I used this book mostly.
 
 
-# Kubernetes on-prem build: Installing Kubernetes on OEL9 using kubeadm
+## Kubernetes on-prem build: Installing Kubernetes on OEL9 using kubeadm
 
 
 ## Pre-Installation
@@ -14,6 +14,8 @@ sudo passwd <chieme>
 
 echo "chieme  ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/chieme
 ```
+</br>
+</br>
 
 ## Installing Docker and Kubernetes
 
@@ -53,8 +55,8 @@ Steps:
 10. (Optional) Proxying API Server to localhost
 11. Cleanup
 
-
-
+</br>
+</br>
 
 ### 1. Installing kubeadm: Configuring the master with kubeadm
 #### Configure Linux Components (SELinux, SWAP and sysctl)
@@ -78,7 +80,7 @@ The Kubelet won’t run if swap is enabled, so you’ll disable it with the foll
 sudo swapoff -a && sudo sed -i '/ swap / s/^/#/' /etc/fstab
 ```
 
-
+</br>
 
 #### Installing a container runtime
 ##### Install and configure prerequisites
@@ -209,7 +211,7 @@ sudo systemctl restart containerd
 
 
 
-
+</br>
 
 #### INSTALLING kubeadm, kubelet and kubectl
 ##### ADDING THE KUBERNETES YUM REPO
@@ -258,6 +260,8 @@ systemctl enable --now kubelet && systemctl start kubelet
 
 
 
+</br>
+</br>
 
 ### 2. CLONING THE VM
 
@@ -268,7 +272,7 @@ shutdown now
 ##### CREATING OTHER NODES from k8s-master (repeat for all VMs):
 Next, we will create the additional host or hosts that are required, and make the changes to those hosts needed to complete the build of an Oracle RAC.
 
-STEPS:
+Steps:
 1. Shutdown existing VM guest 'shutdown -h now', 
 
 2. from VMware workstation, choose Manage=>clone.
@@ -328,7 +332,8 @@ Link:
 
 
 
-
+</br>
+</br>
 
 ### 3. Running `kubeadm Init` to initialize the master
 ```shell
@@ -377,7 +382,8 @@ kubeadm join master:6443 --token 68f0ys.jwfefd7r03lqtupm \
 
 ```
 
-
+</br>
+</br>
 
 ### 4. Configuring worker nodes with kubeadm
 
@@ -411,7 +417,8 @@ KubeletNotReady              container runtime network not ready: NetworkReady=f
 
 ```
 
-
+</br>
+</br>
 
 ### 5. Install Helm
 ```shell
@@ -434,7 +441,8 @@ Link:
 
 
 
-
+</br>
+</br>
 
 ### 6. Install Cilium CNI
 
@@ -462,7 +470,8 @@ Link:
 
 
 
-
+</br>
+</br>
 
 ### 7. Validate the Installation using Cilium CLI
 
@@ -496,7 +505,8 @@ Image versions         cilium             quay.io/cilium/cilium:v1.13.4@sha256:b
 
 ```
 
-
+</br>
+</br>
 
 ### 8. Verify Installation
 ```shell
@@ -599,7 +609,8 @@ nginx-deployment-6b7f675859-v6ccf   1/1     Running   0          54s   10.244.1.
 ```
 
 
-
+</br>
+</br>
 
 ### 9. Setup environments where you will be running kubectl commands
 ```shell
@@ -622,12 +633,14 @@ k8s-node2    Ready    <none>          7h10m   v1.27.3
 
 ```
 
-
+</br>
+</br>
 
 ### 10. Install Kubernetes Metrics Server
 see monitoring.txt
 
-
+</br>
+</br>
 
 ### 11. Stopping and Starting  the Kubernetes cluster
 To stop the cluster:
@@ -656,9 +669,8 @@ Links:
 
 
 
-
-
-
+</br>
+</br>
 
 ### 12. Clean up or Restart installation:
 
