@@ -24,7 +24,7 @@ Prerequisites:
 
 
 Steps:
-<font size ="2">
+<font size ="1">
 1. Installing kubeadm: Configuring the master with kubeadm
 	- CONFIGURE LINUX COMPONENTS (MAC Address, Network adapters, Ports, SWAP)
 	- Installing a container runtime
@@ -265,7 +265,7 @@ shutdown now
 ##### CREATING OTHER NODES from k8s-master (repeat for all VMs):
 Next, we will create the additional host or hosts that are required, and make the changes to those hosts needed to complete the build of an Oracle RAC.
 
-<font size="2">
+<font size="1">
 
 STEPS:
 1. Shutdown existing VM guest 'shutdown -h now', 
@@ -626,7 +626,7 @@ see monitoring.txt
 ### 11. Stopping and Starting  the Kubernetes cluster
 To stop the cluster:
 
-<font size="2">
+<font size="1">
 
 1. As the root user, enter the following command to stop the Kubernetes worker nodes:
 
@@ -640,7 +640,7 @@ To stop the cluster:
 Starting the Kubernetes cluster
 To restart the cluster:
 
-<font size="2">
+<font size="1">
 
 1. Start the server or virtual machine that is running the Docker registry first. This will automatically start the Docker registry. The Docker registry is normally running on the Kubernetes Master node and
    will get started when Master node is started.
