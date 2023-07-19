@@ -24,6 +24,7 @@ Prerequisites:
 
 
 Steps:
+<font size ="2">
 1. Installing kubeadm: Configuring the master with kubeadm
 	- CONFIGURE LINUX COMPONENTS (MAC Address, Network adapters, Ports, SWAP)
 	- Installing a container runtime
@@ -46,8 +47,9 @@ Steps:
 9. Using the cluster from your local machine
 	- (Optional) Controlling your cluster from machines other than the control-plane node
 10. (Optional) Proxying API Server to localhost
-11. Cleanup
+11. Cleanup 
 
+</font>
 
 
 
@@ -263,26 +265,22 @@ shutdown now
 ##### CREATING OTHER NODES from k8s-master (repeat for all VMs):
 Next, we will create the additional host or hosts that are required, and make the changes to those hosts needed to complete the build of an Oracle RAC.
 
+<font size="2">
+
 STEPS:
 1. Shutdown existing VM guest 'shutdown -h now', 
-
 2. from VMware workstation, choose Manage=>clone.
-
 3. current state -> full clone -> name and location (should've created folder)
-
 4. When completed, click close. Do not start up the new host yet. There are some settings that need to be changed
-
 5. Assign new MAC addresses to the NICs in the VM
 Any routers that used reserved IPs will use the MAC address to assign them, so we want to make sure this workstation has different MAC addresses than the original
 
-VM Settings -> Network Adapter -> Advanced -> MAC address -> generate
+> VM Settings -> Network Adapter -> Advanced -> MAC address -> generate
 Do the same for each Network Interface card (NIC) (bridged, NAT, host-only): In this case, I delete other adapters and used only bridged adapter
 
 6. power on VM
-
 7. Login as root
-Network settings -> set IP addresses as done before (Public n Private Network setup)
-
+> Network settings -> set IP addresses as done before (Public n Private Network setup)
 8. set hostname: run as root or any sudoer
 ```shell
 hostnamectl set-hostname <node1>
@@ -292,6 +290,7 @@ hostnamectl set-hostname <node1>
 ```shell
 reboot
 ```
+</font>
 
 
 
@@ -626,24 +625,32 @@ see monitoring.txt
 
 ### 11. Stopping and Starting  the Kubernetes cluster
 To stop the cluster:
+
+<font size="2">
+
 1. As the root user, enter the following command to stop the Kubernetes worker nodes:
 
-shutdown -h now
+> shutdown -h now
 
 2. Stop all worker nodes, simultaneously or individually.
 3. After all the worker nodes are shut down, shut down the Kubernetes master node.
-
+</font>
 
 
 Starting the Kubernetes cluster
 To restart the cluster:
 
+<font size="2">
+
 1. Start the server or virtual machine that is running the Docker registry first. This will automatically start the Docker registry. The Docker registry is normally running on the Kubernetes Master node and
    will get started when Master node is started.
+
 2. Start the NFS server and wait two minutes after the operating system has started. The NFS server is normally on the Kubernetes Master Node.
+
 3. Start all worker nodes either simultaneously or individually. If the NFS server is on a dedicated host (not the Kubernetes master node), start the Kubernetes master at the same time you start the worker
   nodes.
 
+</font>
 
 Links: 
 1. https://www.ibm.com/docs/en/fci/1.0.2?topic=SSCKRH_1.0.2/platform/t_start_stop_kube_cluster.htm
