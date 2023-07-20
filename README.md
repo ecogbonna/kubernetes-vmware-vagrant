@@ -95,17 +95,6 @@ sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables ne
 ##### Container Runtime: Installing Containerd from apt-get or dnf
 
 
----
-**NOTE**
-
-*1. You need a container engine, high-level container runtime, and a low-level container runtime.*
-
-*2. On OEL9, no need to install docker. RHEL distributions will have podman installed already.*
-
-*3. I chose containerd (i.e. podman -> containerd -> runc), you can go with CRI-O, Docker Engine (cri-dockerd adapter), or Mirantis Container Runtime.*
-
----
-
 
 ##### Install required packages
 ```shell 
@@ -128,31 +117,17 @@ sudo systemctl restart containerd && sudo systemctl enable containerd
 
 ```
 
-Links:
-1. [containerd github](https://github.com/containerd/containerd/blob/main/docs/getting-started.md)
-2. [containerd docker](https://docs.docker.com/engine/install/centos/)
-3. [containerd computingforgeeks](https://computingforgeeks.com/)
-4. [kubernetes containerd](install-kubernetes-cluster-on-centos-with-kubeadm/?amp)
-
 
 
 
 ##### Configuring the systemd cgroup driver
----
-**NOTE**
-
-To use the systemd cgroup driver in /etc/containerd/config.toml with runc, set:
-
-[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
-  ...
-  [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
-    SystemdCgroup = true
+> To use the systemd cgroup driver in /etc/containerd/config.toml with runc, set:
 
 ```shell
-vi /etc/containerd/config.toml
+sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
 sudo systemctl restart containerd
 ```
----
+
 
 
 
@@ -160,13 +135,10 @@ sudo systemctl restart containerd
 ##### Overriding The Sandbox (Pause) Image
 In your containerd config you can overwrite the sandbox image by setting the following config:
 
-[plugins."io.containerd.grpc.v1.cri"]
-  sandbox_image = "registry.k8s.io/pause:3.9"
-  
-  
+```shell
+sudo sed -i 's/3.6/3.9/g' /etc/containerd/config.toml
 sudo systemctl restart containerd
- 
-
+```
 > Do this to avoid WARNINGs during kubeadm init. kubeadm uses 3.9, but containered used 3.6
 
 
@@ -531,3 +503,9 @@ References:
 3. https://github.com/flannel-io/flannel#deploying-flannel-manually
 4. https://docs.docker.com/engine/install/centos/
 5. https://github.com/containerd/containerd/blob/main/docs/getting-started.md
+
+Links:
+1. [containerd github](https://github.com/containerd/containerd/blob/main/docs/getting-started.md)
+2. [containerd docker](https://docs.docker.com/engine/install/centos/)
+3. [containerd computingforgeeks](https://computingforgeeks.com/)
+4. [kubernetes containerd](install-kubernetes-cluster-on-centos-with-kubeadm/?amp)
