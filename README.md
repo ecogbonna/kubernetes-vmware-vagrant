@@ -1,6 +1,6 @@
 # kubernetes
 Some YAML files were adopted from my Google partner labs and will be used as starters for my other kubernetes implementations.
-There are also files from Kubernetes in Action book by Marko Lukša. In fact, I used this book mostly.
+There are also files from Kubernetes in Action book by Marko Lukša. In fact, I used this book mostly and I strongly recommend.
 
 
 ## Kubernetes on-prem build: Installing Kubernetes on OEL9 using kubeadm
@@ -29,31 +29,6 @@ Prerequisites:
 	• Certain ports are open on your machines. See here for more details.
 	• Swap disabled. You MUST disable swap in order for the kubelet to work properly.
 
-
-Steps:
-1. Installing kubeadm: Configuring the master with kubeadm
-	- CONFIGURE LINUX COMPONENTS (MAC Address, Network adapters, Ports, SWAP)
-	- Installing a container runtime
-		- Install and configure prerequisites 
-			- Forwarding IPv4 and letting iptables see bridged traffic (sysctl)
-		- Container runtime: installing containerd from apt-get or dnf
-		- cgroup drivers
-			- systemd cgroup driver (recommended)
-				- Configuring the systemd cgroup driver: containerd
-	- Installing kubeadm, kubelet and kubectl
-2. Cloning the Master node to create worker nodes: remember to change MAC Address IP, and hostname
-3. Initializing your control-plane node.
-	- plan for high availability by specifying the --control-plane-endpoint to set the shared endpoint for all control-plane nodes. (Recommended) 
-	- Choose a Pod network add-on, and verify whether it requires any arguments to be passed to kubeadm init: flannel requires --pod-network-cidr (Recommended) 
-4. Save the node join command with the token.
-5. Join the worker node to the master node (control plane) using kubeadm join command.
-6. Install and Validate Cilium CNI for flat-inter-pod networking.
-7. Validate all cluster components and nodes.
-8. Install Kubernetes Metrics Server
-9. Using the cluster from your local machine
-	- (Optional) Controlling your cluster from machines other than the control-plane node
-10. (Optional) Proxying API Server to localhost
-11. Cleanup
 
 </br>
 </br>
@@ -263,7 +238,7 @@ systemctl enable --now kubelet && systemctl start kubelet
 </br>
 </br>
 
-### 2. CLONING THE VM
+### 2. CLONING THE VMs
 
 ```shell 
 shutdown now
@@ -284,7 +259,8 @@ Steps:
 5. Assign new MAC addresses to the NICs in the VM
 Any routers that used reserved IPs will use the MAC address to assign them, so we want to make sure this workstation has different MAC addresses than the original
 
-VM Settings -> Network Adapter -> Advanced -> MAC address -> generate
+  > VM Settings -> Network Adapter -> Advanced -> MAC address -> generate
+
 Do the same for each Network Interface card (NIC) (bridged, NAT, host-only): In this case, I delete other adapters and used only bridged adapter
 
 6. power on VM
@@ -348,38 +324,6 @@ Link:
   --control-plane-endpoint=master \
   --apiserver-advertise-address=192.168.1.70
 
-...
-Your Kubernetes control-plane has initialized successfully!
-
-To start using your cluster, you need to run the following as a regular user:
-
-  mkdir -p $HOME/.kube
-  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-  sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
-Alternatively, if you are the root user, you can run:
-
-  export KUBECONFIG=/etc/kubernetes/admin.conf
-
-You should now deploy a pod network to the cluster.
-Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
-  https://kubernetes.io/docs/concepts/cluster-administration/addons/
-
-You can now join any number of control-plane nodes by copying certificate authorities
-and service account keys on each node and then running the following as root:
-
-  kubeadm join master:6443 --token 68f0ys.jwfefd7r03lqtupm \
-        --discovery-token-ca-cert-hash sha256:cad6144cd55c8f0f91e1ff205e3ba2a465ea5b9bd866c43f58230f4546eab281 \
-        --control-plane
-
-Then you can join any number of worker nodes by running the following on each as root:
-
-kubeadm join master:6443 --token 68f0ys.jwfefd7r03lqtupm \
-        --discovery-token-ca-cert-hash sha256:cad6144cd55c8f0f91e1ff205e3ba2a465ea5b9bd866c43f58230f4546eab281
-		
-		
-# --control-plane-endpoint=master makes it possible to join any number of control-plane nodes i.e. for HA clusters, without it, we can only join worker nodes
-
 ```
 
 </br>
@@ -390,32 +334,11 @@ kubeadm join master:6443 --token 68f0ys.jwfefd7r03lqtupm \
 ```shell
 kubeadm join master:6443 --token 68f0ys.jwfefd7r03lqtupm \
         --discovery-token-ca-cert-hash sha256:cad6144cd55c8f0f91e1ff205e3ba2a465ea5b9bd866c43f58230f4546eab281
-[preflight] Running pre-flight checks
-[preflight] Reading configuration from the cluster...
-[preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -o yaml'
-[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
-[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
-[kubelet-start] Starting the kubelet
-[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...
 
-This node has joined the cluster:
-* Certificate signing request was sent to apiserver and a response was received.
-* The Kubelet was informed of the new secure connection details.
+kubectl get nodes
+kubectl describe node k8s-node1
 
-Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 
-# kubectl get nodes
-NAME     STATUS     ROLES           AGE     VERSION
-master   NotReady   control-plane   30m     v1.26.1
-node1    NotReady   <none>          2m57s   v1.26.1
-node2    NotReady   <none>          67s     v1.26.1
-
-# kubectl describe node k8s-node1
-Conditions:
-...
-KubeletNotReady              container runtime network not ready: NetworkReady=false reason:NetworkPluginNotReady message:Network plugin r
-
-```
 
 </br>
 </br>
@@ -449,17 +372,6 @@ Link:
 ```shell
 helm repo add cilium https://helm.cilium.io/
 helm install cilium cilium/cilium --version 1.13.4 --namespace kube-system
-NAME: cilium
-LAST DEPLOYED: Tue Jul 18 16:48:51 2023
-NAMESPACE: kube-system
-STATUS: deployed
-REVISION: 1
-TEST SUITE: None
-NOTES:
-You have successfully installed Cilium with Hubble.
-
-Your release version is 1.13.4.
-...
 ```
 
 
@@ -486,23 +398,6 @@ rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 
 
 cilium status --wait
-    /¯¯\
- /¯¯\__/¯¯\    Cilium:             OK
- \__/¯¯\__/    Operator:           OK
- /¯¯\__/¯¯\    Envoy DaemonSet:    disabled (using embedded mode)
- \__/¯¯\__/    Hubble Relay:       disabled
-    \__/       ClusterMesh:        disabled
-
-Deployment             cilium-operator    Desired: 2, Ready: 2/2, Available: 2/2
-DaemonSet              cilium             Desired: 3, Ready: 3/3, Available: 3/3
-Containers:            cilium             Running: 3
-                       cilium-operator    Running: 2
-Cluster Pods:          6/6 managed by Cilium
-Helm chart version:    1.13.4
-Image versions         cilium             quay.io/cilium/cilium:v1.13.4@sha256:bde8800d61aaad8b8451b10e247ac7bdeb7af187bb698f83d40ad75a38c1ee6b: 3
-                       cilium-operator    quay.io/cilium/operator-generic:v1.13.4@sha256:09ab77d324ef4d31f7d341f97ec5a2a4860910076046d57a2d61494d426c6301: 2
-
-
 ```
 
 </br>
@@ -511,11 +406,6 @@ Image versions         cilium             quay.io/cilium/cilium:v1.13.4@sha256:b
 ### 8. Verify Installation
 ```shell
 kubectl get nodes
-NAME     STATUS   ROLES           AGE   VERSION
-master   Ready    control-plane   29m   v1.26.1
-node1    Ready    <none>          25m   v1.26.1
-node2    Ready    <none>          25m   v1.26.1
-
 
 kubectl get nodes --show-labels
 kubectl label node node1 node-role.kubernetes.io/node1=worker
@@ -524,18 +414,11 @@ kubectl label node node1 node-role.kubernetes.io/node1=worker
 kubectl label node node1  node-role.kubernetes.io/k8s-node1-							
 node/node1 unlabeled
 
-
 kubectl label node node1 node-role.kubernetes.io/node1=worker
-node/node1 labeled
-
 kubectl label node node2 node-role.kubernetes.io/node2=worker
-node/node2 labeled
 
 kubectl get nodes
-NAME     STATUS   ROLES           AGE   VERSION
-master   Ready    control-plane   35m   v1.26.1
-node1    Ready    node1           31m   v1.26.1
-node2    Ready    node2           31m   v1.26.1
+
 
 
 # You verify all the cluster component health statuses using the following command:
@@ -592,19 +475,10 @@ curl -s http://192.168.1.71:32000/
 
 
  k get svc
-NAME            TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)        AGE
-kubernetes      ClusterIP   10.64.0.1     <none>        443/TCP        105m
-nginx-service   NodePort    10.64.8.171   <none>        80:32000/TCP   29s
 
  k get deploy -o wide
-NAME               READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES         SELECTOR
-nginx-deployment   2/2     2            2           43s   nginx        nginx:latest   app=nginx
 
-k get pods -o wide
-NAME                                READY   STATUS    RESTARTS   AGE   IP            NODE    NOMINATED NODE   READINESS GATES
-nginx-deployment-6b7f675859-rcrq9   1/1     Running   0          54s   10.244.2.15   node2   <none>           <none>
-nginx-deployment-6b7f675859-v6ccf   1/1     Running   0          54s   10.244.1.6    node1   <none>           <none>
-
+ k get pods -o wide
 
 ```
 
@@ -614,7 +488,7 @@ nginx-deployment-6b7f675859-v6ccf   1/1     Running   0          54s   10.244.1.
 
 ### 9. Setup environments where you will be running kubectl commands
 ```shell
-$ sudo dnf install -y bash-completion
+sudo dnf install -y bash-completion
 
 # CREATING AN ALIAS
 
@@ -625,12 +499,7 @@ echo "source <(kubectl completion bash)" >> ~/.bash_profile
 echo "source <(kubectl completion bash | sed s/kubectl/k/g)" >> ~/.bash_profile
 . .bash_profile
 
-$ k get nodes
-NAME         STATUS   ROLES           AGE     VERSION
-k8s-master   Ready    control-plane   7h19m   v1.27.3
-k8s-node1    Ready    <none>          7h10m   v1.27.3
-k8s-node2    Ready    <none>          7h10m   v1.27.3
-
+k get nodes
 ```
 
 </br>
@@ -641,26 +510,6 @@ see monitoring.txt
 
 </br>
 </br>
-
-### 11. Stopping and Starting  the Kubernetes cluster
-To stop the cluster:
-1. As the root user, enter the following command to stop the Kubernetes worker nodes:
-
-shutdown -h now
-
-2. Stop all worker nodes, simultaneously or individually.
-3. After all the worker nodes are shut down, shut down the Kubernetes master node.
-
-
-
-Starting the Kubernetes cluster
-To restart the cluster:
-
-1. Start the server or virtual machine that is running the Docker registry first. This will automatically start the Docker registry. The Docker registry is normally running on the Kubernetes Master node and
-   will get started when Master node is started.
-2. Start the NFS server and wait two minutes after the operating system has started. The NFS server is normally on the Kubernetes Master Node.
-3. Start all worker nodes either simultaneously or individually. If the NFS server is on a dedicated host (not the Kubernetes master node), start the Kubernetes master at the same time you start the worker
-  nodes.
 
 
 Links: 
