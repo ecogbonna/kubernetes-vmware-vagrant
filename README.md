@@ -106,21 +106,6 @@ sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables ne
 
 ---
 
-```shell
-# which podman
-/usr/bin/podman
-[root@master ~]# podman version
-Client:       Podman Engine
-Version:      4.4.1
-API Version:  4.4.1
-Go Version:   go1.19.6
-Built:        Fri May 12 09:55:18 2023
-OS/Arch:      linux/amd64
-```
-
-
-
-
 
 ##### Install required packages
 ```shell 
