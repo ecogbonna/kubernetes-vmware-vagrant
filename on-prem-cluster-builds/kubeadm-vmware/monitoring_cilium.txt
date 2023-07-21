@@ -39,76 +39,22 @@ Note:
 This configuration requires having a cluster with at least 2 nodes on which Metrics Server can be scheduled. To install the latest Metrics Server release in high availability mode from the 
 high-availability.yaml manifest, run the following command.
 
-[root@master ~]# curl -LO https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/high-availability.yaml
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100  4689  100  4689    0     0   3727      0  0:00:01  0:00:01 --:--:--  3727
-[root@master ~]#
-[root@master ~]#
-[root@master ~]# ls
-anaconda-ks.cfg  canal.yaml  components.yaml  high-availability.yaml  init.log
-[root@master ~]#
-[root@master ~]# vi high-availability.yaml
-[root@master ~]# kubectl apply -f high-availability.yaml
-serviceaccount/metrics-server created
-clusterrole.rbac.authorization.k8s.io/system:aggregated-metrics-reader created
-clusterrole.rbac.authorization.k8s.io/system:metrics-server created
-rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader created
-clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator created
-clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server created
-service/metrics-server created
-deployment.apps/metrics-server created
-apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io created
-error: resource mapping not found for name: "metrics-server" namespace: "kube-system" from "high-availability.yaml": no matches for kind "PodDisruptionBudget" in version "policy/v1beta1"
-ensure CRDs are installed first
-[root@master ~]#
-[root@master ~]# kubectl explain PodDisruptionBudget
-KIND:     PodDisruptionBudget
-VERSION:  policy/v1
+curl -LO https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/high-availability.yaml
+sudo sed -i 's/policy\/v1beta1/policy\/v1/g' high-availability.yaml
 
-DESCRIPTION:
-     PodDisruptionBudget is an object to define the max disruption that can be
-     caused to a collection of pods
+kubectl apply -f high-availability.yaml
 
-FIELDS:
-   apiVersion   <string>
-     APIVersion defines the versioned schema of this representation of an
-     object. Servers should convert recognized schemas to the latest internal
-     value, and may reject unrecognized values. More info:
-     https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+kubectl get deployment metrics-server -n kube-system
 
-   kind <string>
-     Kind is a string value representing the REST resource this object
-     represents. Servers may infer this from the endpoint the client submits
-     requests to. Cannot be updated. In CamelCase. More info:
-     https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
 
-   metadata     <Object>
-     Standard object's metadata. More info:
-     https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
+OR:
 
-   spec <Object>
-     Specification of the desired behavior of the PodDisruptionBudget.
+Deploy in non-HA Mode
+=====================
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 
-   status       <Object>
-     Most recently observed status of the PodDisruptionBudget.
+kubectl get deployment metrics-server -n kube-system
 
-[root@master ~]# vi high-availability.yaml																				# change Api version from policy/v1beta1 to policy/v1
-[root@master ~]# kubectl apply -f high-availability.yaml
-serviceaccount/metrics-server unchanged
-clusterrole.rbac.authorization.k8s.io/system:aggregated-metrics-reader unchanged
-clusterrole.rbac.authorization.k8s.io/system:metrics-server unchanged
-rolebinding.rbac.authorization.k8s.io/metrics-server-auth-reader unchanged
-clusterrolebinding.rbac.authorization.k8s.io/metrics-server:system:auth-delegator unchanged
-clusterrolebinding.rbac.authorization.k8s.io/system:metrics-server unchanged
-service/metrics-server unchanged
-deployment.apps/metrics-server configured
-poddisruptionbudget.policy/metrics-server created
-apiservice.apiregistration.k8s.io/v1beta1.metrics.k8s.io unchanged
-
-[root@master ~]# kubectl get deployment metrics-server -n kube-system
 
 
 
@@ -162,12 +108,10 @@ Events:                    <none>
 
 
 
-TEST 1: Disable firewall on all nodes
-=====================================
-Step 1: Enable and Disable firewall and watch
+SOLUTION 1: Disable firewall on all nodes
+=========================================
+Step 1: Disable firewall and watch
 # systemctl disable firewalld && systemctl stop firewalld
-# systemctl enable firewalld && systemctl start firewalld
-# firewall-cmd --list-all
 
 
 $ k get APIservice v1beta1.metrics.k8s.io
@@ -196,7 +140,7 @@ node2    559m         27%    2518Mi          69%
 
 
 Comment:
-Nodes can reach each other, so it's not a a problem due to network configuration, rather it's a problem with firewall
+Nodes can reach each other, so it's a problem with firewall
 
 
 watch -n2 kubectl top nodes
@@ -204,7 +148,7 @@ watch -n2 kubectl top nodes
 
 
 step 2: 
-# systemctl restart kubelet
+systemctl restart kubelet
 
 # even after restart, metrics-server worked perfectly
 
@@ -232,9 +176,6 @@ $ k describe APIservice v1beta1.metrics.k8s.io | grep Conditions -A4
     Message:               all checks passed
     Reason:                Passed
     Status:                True
-
-
-After restart, issue persisted, so will need to disable and enable firewall again.
 
 
 

@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
     config.ssh.forward_agent = true
 
     config.vm.provision :shell, path: "kubeadm/bootstrap.sh", env: { "VERSION" => version }
-    config.vm.define "master" do |master|
+    config.vm.define "master", primary: true do |master|
       master.vm.box = "oraclebase/oracle-9"
       master.vm.hostname = "k8s-master.#{domain}"
       master.vm.network "public_network", ip: "#{master_node_ip}"
