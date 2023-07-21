@@ -67,105 +67,6 @@ https://computingforgeeks.com/how-to-deploy-metrics-server-to-kubernetes-cluster
 Validating Metrics server installation
 ======================================
 $ k get APIservice v1beta1.metrics.k8s.io
-NAME                                   SERVICE                      AVAILABLE                      AGE
-v1beta1.metrics.k8s.io                 kube-system/metrics-server   False (FailedDiscoveryCheck)   2m32s
-
-
-$ k top nodes
-Error from server (ServiceUnavailable): the server is currently unable to handle the request (get nodes.metrics.k8s.io)
-
-
-$ k describe APIservice v1beta1.metrics.k8s.io
-...
-Status:
-  Conditions:
-    Last Transition Time:  2023-07-17T11:08:19Z
-    Message:               failing or missing response from https://10.64.7.122:443/apis/metrics.k8s.io/v1beta1: Get "https://10.64.7.122:443/apis/metrics.k8s.io/v1beta1": dial tcp 10.64.7.122:443: connect: no route to host
-    Reason:                FailedDiscoveryCheck
-    Status:                False
-    Type:                  Available
-Events:                    <none>
-
-
-Troubleshooting:
-=-------------=
-$ k get svc -A -o wide
-$ k get pods -A --show-labels
-
-$ kubectl logs -n kube-system -l k8s-app=metrics-server --container metrics-server
-
-
-$ k describe APIservice v1beta1.metrics.k8s.io
-...
-Status:
-  Conditions:
-    Last Transition Time:  2023-07-17T11:08:19Z
-    Message:               failing or missing response from https://10.64.7.122:443/apis/metrics.k8s.io/v1beta1: Get "https://10.64.7.122:443/apis/metrics.k8s.io/v1beta1": dial tcp 10.64.7.122:443: i/o timeout
-    Reason:                FailedDiscoveryCheck
-    Status:                False
-    Type:                  Available
-Events:                    <none>
-
-
-
-SOLUTION 1: Disable firewall on all nodes
-=========================================
-Step 1: Disable firewall and watch
-# systemctl disable firewalld && systemctl stop firewalld
-
-
-$ k get APIservice v1beta1.metrics.k8s.io
-NAME                                   SERVICE                      AVAILABLE   AGE
-v1beta1.metrics.k8s.io                 kube-system/metrics-server   True        13m
-
-
-
-$ k describe APIservice v1beta1.metrics.k8s.io
-...
-Status:
-  Conditions:
-    Last Transition Time:  2023-07-17T11:21:09Z
-    Message:               all checks passed
-    Reason:                Passed
-    Status:                True
-    Type:                  Available
-Events:                    <none>
-
-
-$ k top nodes
-NAME     CPU(cores)   CPU%   MEMORY(bytes)   MEMORY%
-master   509m         25%    2674Mi          73%
-node1    186m         9%     2563Mi          70%
-node2    559m         27%    2518Mi          69%
-
-
-Comment:
-Nodes can reach each other, so it's a problem with firewall
-
-
-watch -n2 kubectl top nodes
-
-
-
-step 2: 
-systemctl restart kubelet
-
-# even after restart, metrics-server worked perfectly
-
-
-
-step 3:
-$ kubectl logs -n kube-system -l k8s-app=metrics-server --container metrics-server
-...
-I0717 11:08:23.091037       1 shared_informer.go:247] Caches are synced for client-ca::kube-system::extension-apiserver-authentication::client-ca-file
-I0717 11:08:23.091141       1 shared_informer.go:247] Caches are synced for client-ca::kube-system::extension-apiserver-authentication::requestheader-client-ca-file
-
-
-
-
-Restart all nodes and check again
-=================================
-$ k get APIservice v1beta1.metrics.k8s.io
 NAME                     SERVICE                      AVAILABLE   AGE
 v1beta1.metrics.k8s.io   kube-system/metrics-server   True        47m
 
@@ -177,7 +78,7 @@ $ k describe APIservice v1beta1.metrics.k8s.io | grep Conditions -A4
     Reason:                Passed
     Status:                True
 
-
+$ k top nodes
 
 $ kubectl run dnsutils --image=chieme/curl --command -- sleep infinity
 $ kubectl run dnsutils --image=chieme/curl --command -- sleep infinity
